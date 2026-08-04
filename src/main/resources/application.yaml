@@ -1,0 +1,78 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: network-anomaly-assistant
+
+  elasticsearch:
+    uris: http://localhost:9200
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/network_assistant
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: password
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: network-assistant-group-v2
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.example.networkanomalyassistant.*"
+        spring.json.value.default.type: "com.example.networkanomalyassistant.dto.NormalizedEvent"
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  kafka:
+    topics:
+      telemetry: telemetry.metrics
+      logs: ingest.logs
+      alerts: ingest.alerts
+      config-changes: ingest.config-changes
+
+  jwt:
+    # 256-bit secret key for HMAC-SHA256 signing
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250655368566D5971}
+    expiration-ms: 86400000 # 24 hours in milliseconds
+
+grpc:
+  client:
+    ml-service:
+      address: 'static://localhost:50051'
+      negotiation-type: plaintext
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,actuator
+  endpoint:
+    health:
+      show-details: always

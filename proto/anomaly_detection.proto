@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package networkassistant.ml;
+
+option java_multiple_files = true;
+option java_package = "com.example.networkanomalyassistant.grpc";
+
+// Representation of a single metric reading //
+message MetricDataPoint {
+  int64 timestamp_ms = 1;
+  string metric_name = 2; // e.g., "cpu_usage", "packet_loss", "latency_ms"
+  double value = 3;
+}
+
+// Request payload for detecting anomalies over a time window //
+message AnomalyDetectionRequest {
+  string device_id = 1;
+  repeated MetricDataPoint data_points = 2;
+  int64 window_start_ms = 3;
+  int64 window_end_ms = 4;
+}
+
+// Result for an individual metric anomaly
+message AnomalyResult {
+  int64 timestamp_ms = 1;
+  string metric_name = 2;
+  double value = 3;
+  double z_score = 4;
+  bool is_anomaly = 5;
+  double anomaly_score = 6; // Normalized score [0.0 - 1.0]
+  string anomaly_type = 7; // e.g., "SPIKE", "DROP", "OUTLIER"
+}
+
+// Aggregated response from the Python ML service
+message AnomalyDetectionResponse {
+  string device_id = 1;
+  repeated AnomalyResult anomalies = 2;
+  bool overall_anomaly_detected = 3;
+  double max_anomaly_score = 4;
+}
+
+service AnomalyDetectionService {
+  rpc DetectAnomalies (AnomalyDetectionRequest) returns (AnomalyDetectionResponse);
+}

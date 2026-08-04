@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package networkassistant.ml;
+
+option java_multiple_files = true;
+option java_package = "com.example.networkanomalyassistant.grpc";
+
+message CausalNode {
+  string id = 1;
+  string device_type = 2;
+  double anomaly_score = 3;
+}
+
+message CausalEdge {
+  string source_id = 1;
+  string target_id = 2;
+  string dependency_type = 3;
+  double weight = 4;
+}
+
+message CausalGraphRequest {
+  repeated CausalNode nodes = 1;
+  repeated CausalEdge edges = 2;
+  int64 time_window_start_ms = 3;
+  int64 time_window_end_ms = 4;
+}
+
+message RootCauseHypothesis {
+  string root_cause_node_id = 1;
+  double confidence_score = 2; // Probability [0.0 - 1.0]
+  repeated string supporting_evidence_node_ids = 3;
+  string explanation = 4;
+}
+
+message CausalInferenceResponse {
+  repeated RootCauseHypothesis hypotheses = 1;
+  string primary_root_cause_id = 2;
+}
+
+service CausalInferenceService {
+  rpc InferRootCause (CausalGraphRequest) returns (CausalInferenceResponse);
+}
