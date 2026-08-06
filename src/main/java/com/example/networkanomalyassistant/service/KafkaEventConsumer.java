@@ -23,23 +23,28 @@ public class KafkaEventConsumer {
     private final MetricRecordRepository metricRecordRepository;
     private final LogSearchRepository logSearchRepository;
     private final AlertSearchRepository alertSearchRepository;
+    private final SignalPresenceMonitorService signalPresenceMonitorService;
 
     public KafkaEventConsumer(MetricRecordRepository metricRecordRepository,
                               LogSearchRepository logSearchRepository,
-                              AlertSearchRepository alertSearchRepository) {
+                              AlertSearchRepository alertSearchRepository,
+                              SignalPresenceMonitorService signalPresenceMonitorService) {
 
         this.metricRecordRepository = metricRecordRepository;
         this.logSearchRepository = logSearchRepository;
         this.alertSearchRepository = alertSearchRepository;
-
+        this.signalPresenceMonitorService = signalPresenceMonitorService;
     }
 
     /**
      * Consumes telemetry metrics from Kafka and persists them to TimescaleDB
      */
-    @KafkaListener(topics = "${app.kafka.topics.telemetry}", groupId = "network-assistant-group")
+    @KafkaListener(topics = "${app.kafka.topics.telemetry}", groupId = "network-assistant-group-v2")
     public void consumeTelemetry(NormalizedEvent event) {
         try {
+            // Refresh heartbeat timestamp for device
+            signalPresenceMonitorService.recordDeviceHeartbeat(event.getSourceDeviceId());
+
             Map<String, Object> payload = event.getPayload();
             String metricName = payload != null && payload.get("metricName") != null ? payload.get("metricName").toString() : "cpu_usage";
             Double metricValue = payload != null && payload.get("metricValue") != null ? Double.valueOf(payload.get("metricValue").toString()) : 0.0;
@@ -64,9 +69,12 @@ public class KafkaEventConsumer {
     /**
      * Consumes alert events from Kafka and indexes them in Elasticsearch
      */
-    @KafkaListener(topics = "${app.kafka.topics.alerts}", groupId = "network-assistant-group")
+    @KafkaListener(topics = "${app.kafka.topics.alerts}", groupId = "network-assistant-group-v2")
     public void consumeAlerts(NormalizedEvent event) {
         try {
+
+            signalPresenceMonitorService.recordDeviceHeartbeat(event.getSourceDeviceId());
+
             Map<String, Object> payload = event.getPayload();
             String alertName = payload != null && payload.get("alertName") != null ? payload.get("alertName").toString() : "GENERIC_ALERT";
             int occurrenceCount = payload != null && payload.get("occurrenceCount") != null ? Integer.parseInt(payload.get("occurrenceCount").toString()) : 1;
@@ -91,9 +99,12 @@ public class KafkaEventConsumer {
     /**
      * Consumes logs and config changes from Kafka and indexes them in Elasticsearch
      */
-    @KafkaListener(topics = "${app.kafka.topics.logs}", groupId = "network-assistant-group")
+    @KafkaListener(topics = "${app.kafka.topics.logs}", groupId = "network-assistant-group-v2")
     public void consumeLogs(NormalizedEvent event) {
         try {
+
+            signalPresenceMonitorService.recordDeviceHeartbeat(event.getSourceDeviceId());
+
             Map<String, Object> payload = event.getPayload();
             String logMsg = payload != null && payload.get("logMessage") != null ? payload.get("logMessage").toString() : "System log event";
             if (payload != null && payload.containsKey("message")) {
