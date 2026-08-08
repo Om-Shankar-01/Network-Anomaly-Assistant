@@ -33,7 +33,7 @@ public class IncidentRecord {
     @Column(name = "severity")
     private String severity; // CRITICAL, WARNING, INFO
 
-    @Column(name = "root_cause_summary")
+    @Column(name = "root_cause_summary", columnDefinition = "TEXT")
     private String rootCauseSummary;
 
     public IncidentRecord() {

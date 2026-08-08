@@ -4,18 +4,21 @@ from typing import List, Dict, Any
 from datetime import datetime, timezone
 from app.services.isolation_forest_engine import IsolationForestEngine
 from app.services.granger_causality_engine import GrangerCausalityEngine
-
+from app.services.bayesian_engine import BayesianCausalEngine
+from app.services.llm_assistant_engine import LLMAssistantEngine
 
 app = FastAPI(
-    title="Network Assistant ML Microservice",
+    title="Network Anomaly ML Microservice",
     version="1.0.0",
-    description="Python service for anomaly detection, Isolation Forests, and Bayesian Belief Networks."
+    description="Python service for statistical anomaly detection, Isolation Forests, Granger Causality, Bayesian Belief Networks, and LLM Report Generation."
 )
 
 iso_engine = IsolationForestEngine(contamination=0.15)
 granger_engine = GrangerCausalityEngine(max_lag=3)
+bayesian_engine = BayesianCausalEngine()
+llm_engine = LLMAssistantEngine()
 
-class HealthResponse (BaseModel) :
+class HealthResponse(BaseModel):
     status: str
     service: str
     timestamp: str
@@ -43,6 +46,18 @@ class GrangerResponse(BaseModel):
     p_value: float
     best_lag: int
     explanation: str
+
+class BayesianCandidate(BaseModel):
+    id: str
+    device_type: str
+    anomaly_score: float
+    has_recent_config_change: bool
+    granger_causal_p_value: float
+    is_missing_evidence: bool
+
+class BayesianRequest(BaseModel):
+    incident_id: str
+    candidates: List[BayesianCandidate]
 
 @app.get("/health", response_model=HealthResponse)
 def health_check():
@@ -73,6 +88,20 @@ def analyze_granger(req: GrangerRequest):
         explanation=result["explanation"]
     )
 
-if __name__ == "__main__" :
+@app.post("/analyze/bayesian")
+def analyze_bayesian(req: BayesianRequest):
+    candidates_dict = [c.dict() for c in req.candidates]
+    ranked = bayesian_engine.rank_root_causes(candidates_dict)
+    return {
+        "incident_id": req.incident_id,
+        "ranked_hypotheses": ranked,
+        "primary_root_cause": ranked[0]["node_id"] if ranked else None
+    }
+
+@app.post("/generate/incident-report")
+def generate_report(context: Dict[str, Any]):
+    return llm_engine.generate_incident_report(context)
+
+if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
