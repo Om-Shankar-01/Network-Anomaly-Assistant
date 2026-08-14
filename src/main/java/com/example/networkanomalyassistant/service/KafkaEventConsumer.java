@@ -24,16 +24,19 @@ public class KafkaEventConsumer {
     private final LogSearchRepository logSearchRepository;
     private final AlertSearchRepository alertSearchRepository;
     private final SignalPresenceMonitorService signalPresenceMonitorService;
+    private final IncidentAuditService incidentAuditService;
 
     public KafkaEventConsumer(MetricRecordRepository metricRecordRepository,
                               LogSearchRepository logSearchRepository,
                               AlertSearchRepository alertSearchRepository,
-                              SignalPresenceMonitorService signalPresenceMonitorService) {
+                              SignalPresenceMonitorService signalPresenceMonitorService,
+                              IncidentAuditService incidentAuditService) {
 
         this.metricRecordRepository = metricRecordRepository;
         this.logSearchRepository = logSearchRepository;
         this.alertSearchRepository = alertSearchRepository;
         this.signalPresenceMonitorService = signalPresenceMonitorService;
+        this.incidentAuditService = incidentAuditService;
     }
 
     /**
@@ -88,6 +91,20 @@ public class KafkaEventConsumer {
             );
 
             alertSearchRepository.save(alertDocument);
+
+            // Inside consumeAlerts(NormalizedEvent event):
+            if ("CRITICAL".equalsIgnoreCase(event.getSeverity())) {
+                incidentAuditService.recordStateTransition(
+                        "INC-" + event.getSourceDeviceId(),
+                        event.getSourceDeviceId(),
+                        "HEALTHY",
+                        IncidentAuditService.STATE_DETECTED,
+                        0.50,
+                        "KAFKA_CONSUMER",
+                        "Critical alert ingested from Kafka: " + event.getPayload().get("alertName")
+                );
+            }
+
             log.warn("Indexed ALERT in Elasticsearch: Device={} | Alert={} | Severity={}",
                     event.getSourceDeviceId(), alertName, event.getSeverity());
 

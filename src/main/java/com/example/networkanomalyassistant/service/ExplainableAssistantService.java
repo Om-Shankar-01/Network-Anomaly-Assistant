@@ -19,12 +19,15 @@ public class ExplainableAssistantService {
 
     private final IncidentContextAggregatorService aggregatorService;
     private final IncidentRecordRepository incidentRecordRepository;
+    private final IncidentAuditService incidentAuditService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     public ExplainableAssistantService(IncidentContextAggregatorService aggregatorService,
-                                       IncidentRecordRepository incidentRecordRepository) {
+                                       IncidentRecordRepository incidentRecordRepository,
+                                       IncidentAuditService incidentAuditService) {
         this.aggregatorService = aggregatorService;
         this.incidentRecordRepository = incidentRecordRepository;
+        this.incidentAuditService = incidentAuditService;
     }
 
     /**
@@ -49,6 +52,16 @@ public class ExplainableAssistantService {
             );
             incident.setEndTime(Instant.now());
             incidentRecordRepository.save(incident);
+
+            incidentAuditService.recordStateTransition(
+                    context.getIncidentId(),
+                    deviceId,
+                    IncidentAuditService.STATE_CONFIRMED,
+                    IncidentAuditService.STATE_RESOLVED,
+                    context.getConfidenceScore(),
+                    reportResponse.getOrDefault("llm_provider", "LLM_ENGINE").toString(),
+                    "Generated explainable markdown report with 3-way evidence matrix and CLI diagnostic recommendations."
+            );
 
             log.info("Persisted Explainable Incident Report [{}] for device [{}] into TimescaleDB",
                     incident.getIncidentId(), deviceId);

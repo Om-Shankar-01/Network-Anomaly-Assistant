@@ -21,6 +21,11 @@ public class SignalPresenceMonitorService {
 
     // Registry tracking last seen timestamp per device: deviceId -> Instant
     private final Map<String, Instant> deviceLastSeenRegistry = new ConcurrentHashMap<>();
+    private final IncidentAuditService incidentAuditService;
+
+    public SignalPresenceMonitorService(IncidentAuditService incidentAuditService) {
+        this.incidentAuditService = incidentAuditService;
+    }
 
     /**
      * Called whenever a device emits a telemetry, log, or alert signal
@@ -55,6 +60,18 @@ public class SignalPresenceMonitorService {
                 );
 
                 missingEvents.add(missingEvent);
+
+                // 3. HOOK BINDING: Record CORRELATED state transition
+                incidentAuditService.recordStateTransition(
+                        "INC-" + deviceId,
+                        deviceId,
+                        IncidentAuditService.STATE_DETECTED,
+                        IncidentAuditService.STATE_CORRELATED,
+                        0.75,
+                        "SIGNAL_PRESENCE_MONITOR",
+                        "Heartbeat gap timeout detected. Device silent for " + secondsOverdue + " seconds"
+                );
+
                 log.warn("MISSING_EVIDENCE DETECTED! Device [{}] silent for {} seconds (Category: {})",
                         deviceId, secondsOverdue, missingEvent.getEvidenceCategory());
             }

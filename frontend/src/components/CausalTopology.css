@@ -1,0 +1,49 @@
+.topology-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  height: 460px;
+}
+
+.topology-container.fullscreen {
+  height: 100vh;
+  width: 100vw;
+  border-radius: 0;
+  border: none;
+  z-index: 9999;
+}
+
+.topology-canvas {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-obsidian);
+  position: relative;
+}
+
+.btn-icon {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background: var(--bg-panel-hover);
+  color: var(--text-primary);
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}

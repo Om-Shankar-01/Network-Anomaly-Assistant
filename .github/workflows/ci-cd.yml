@@ -1,0 +1,69 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 1. Setup & Test Java Backend
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'gradle'
+        
+    - name: Run Java Unit Tests
+      run: |
+        chmod +x gradlew
+        ./gradlew test
+
+    # 2. Setup & Test Python ML Service
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Run Python ML Tests
+      run: |
+        cd ml-service
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio httpx "pandas<3.0.0"
+        pytest
+
+  build:
+    name: Build Docker Images
+    needs: test # Only runs if the 'test' job passes
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Build Java Docker Image
+      run: docker build -t network-anomaly-java:latest .
+      
+    - name: Build ML Docker Image
+      run: |
+        cd ml-service
+        docker build -t network-anomaly-ml:latest .
+        
+    # Note: To enable pushing to a registry, uncomment the lines below and add your secrets to GitHub
+    # - name: Log in to Docker Hub
+    #   uses: docker/login-action@v3
+    #   with:
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
+    # - name: Push Images
+    #   run: |
+    #     docker tag network-anomaly-java:latest ${{ secrets.DOCKER_USERNAME }}/network-anomaly-java:latest
+    #     docker push ${{ secrets.DOCKER_USERNAME }}/network-anomaly-java:latest

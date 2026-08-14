@@ -58,6 +58,35 @@ services:
     volumes:
       - es_data:/usr/share/elasticsearch/data
 
+  java-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: network_anomaly_java
+    ports:
+      - "8080:8080"
+    depends_on:
+      - neo4j
+      - kafka
+      - timescale
+      - elasticsearch
+      - ml-service
+    environment:
+      # These environment variables override your application.yml to use the Docker DNS names instead of localhost
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://timescale:5432/network_assistant
+      - SPRING_NEO4J_URI=bolt://neo4j:7687
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+      - APP_ML_SERVICE_URL=http://ml-service:8000
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: network_anomaly_ml
+    ports:
+      - "8000:8000"
+
 volumes:
   neo4j_data:
   neo4j_logs:

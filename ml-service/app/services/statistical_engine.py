@@ -35,7 +35,7 @@ class StatisticalAnomalyEngine:
 
         for idx, (val, z) in enumerate(zip(np_values, z_scores)):
             abs_z = abs(z)
-            is_anomaly = abs_z >= self.z_threshold
+            is_anomaly = bool(abs_z >= self.z_threshold)
 
             # Normalize anomaly score between 0.0 and 1.0
             score = min(1.0, float(abs_z / 4.0))

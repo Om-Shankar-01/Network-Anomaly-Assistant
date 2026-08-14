@@ -29,6 +29,17 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Allow public access to auth, swagger, and actuator health
                 .requestMatchers(
+                        "/",
+                        "/index.html",
+                        "/assets/**",
+                        "/favicon.ico",
+                        "/favicon.svg",
+                        "/login",
+                        "/topology",
+                        "/causal",
+                        "/audit",
+                        "/search",
+                        "/admin",
                     "/api/v1/auth/**", 
                     "/api/v1/system/**", 
                     "/swagger-ui.html", 

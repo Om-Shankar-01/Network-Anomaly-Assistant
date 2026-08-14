@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Dict, Any
@@ -6,6 +7,9 @@ from app.services.isolation_forest_engine import IsolationForestEngine
 from app.services.granger_causality_engine import GrangerCausalityEngine
 from app.services.bayesian_engine import BayesianCausalEngine
 from app.services.llm_assistant_engine import LLMAssistantEngine
+from dotenv import load_dotenv
+
+load_dotenv(verbose=True)
 
 app = FastAPI(
     title="Network Anomaly ML Microservice",

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: java-backend
+  template:
+    metadata:
+      labels:
+        app: java-backend
+    spec:
+      containers:
+        - name: java-backend
+          image: network-anomaly-java:latest
+          imagePullPolicy: Never # Use local docker image
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://timescale:5432/network_assistant
+            - name: SPRING_NEO4J_URI
+              value: bolt://neo4j:7687
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:9092
+            - name: SPRING_ELASTICSEARCH_URIS
+              value: http://elasticsearch:9200
+            - name: APP_ML_SERVICE_URL
+              value: http://ml-service:8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: java-backend
+spec:
+  type: NodePort
+  selector:
+    app: java-backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080

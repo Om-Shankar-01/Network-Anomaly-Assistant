@@ -1,0 +1,86 @@
+.copilot-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.copilot-body {
+  padding: 1.5rem;
+  background: var(--bg-obsidian);
+}
+
+.report-markdown h4 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 0.25rem;
+}
+
+.report-markdown p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.diagnostic-commands {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 2px;
+  padding: 1rem;
+}
+
+.commands-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.command-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #000;
+  border: 1px solid #333;
+  padding: 0.5rem 1rem;
+  border-radius: 2px;
+}
+
+.command-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #a1a1aa;
+}
+
+.command-text .prompt {
+  color: var(--status-healthy);
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+.btn-copy {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-copy:hover {
+  background: var(--bg-panel-hover);
+  color: var(--text-primary);
+}
+
+.text-healthy { color: var(--status-healthy); }
+
+/* Spacing helpers */
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.flex { display: flex; }
+.items-center { align-items: center; }

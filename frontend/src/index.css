@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* Deep Monochrome Backgrounds */
+  --bg-obsidian: #000000;
+  --bg-panel: #09090b;
+  --bg-panel-hover: #18181b;
+  
+  /* Light Blue Accents */
+  --accent-indigo: #38bdf8; /* Sharp Light Blue */
+  --accent-purple: #7dd3fc; /* Paler Blue for secondary highlights */
+  
+  /* High Contrast Monochrome Text */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #52525b;
+  
+  /* Status Colors */
+  --status-critical: #ef4444; /* Keep red for critical */
+  --status-warning: #f59e0b; /* Keep amber for warning */
+  --status-healthy: #38bdf8; /* Light blue to match the theme */
+  
+  --border-light: #27272a; /* Hard monochrome borders */
+  
+  /* Layout */
+  --sidebar-width: 280px;
+  --header-height: 72px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background-color: var(--bg-obsidian);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Terminal Panel Class */
+.terminal-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 0px;
+  transition: all 0.2s ease;
+}
+
+.terminal-panel:hover {
+  background: var(--bg-panel-hover);
+  border-color: #333333;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Base button */
+.btn-primary {
+  background: var(--bg-panel-hover);
+  color: var(--accent-indigo);
+  border: 1px solid var(--accent-indigo);
+  padding: 8px 16px;
+  border-radius: 0px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn-primary:hover {
+  background: var(--accent-indigo);
+  color: #0f172a;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  padding: 8px 16px;
+  border-radius: 0px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-panel-hover);
+  border-color: #333333;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
+
+/* Utilities */
+.text-gradient {
+  color: var(--accent-indigo);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
